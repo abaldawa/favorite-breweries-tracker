@@ -18,12 +18,18 @@ export interface RandomBeer extends FavoriteBeer {
   checked: boolean;
 }
 
+export interface SelectableFavoriteBeer extends FavoriteBeer {
+  checked: boolean;
+}
+
 const MAX_BEER_SEARCH_RESULTS_PER_PAGE = 10;
 
 const Home = () => {
   const [beerSearchSetting, setBeerSearchSetting] =
     useState<BeerSearchSetting>();
   const [randomBeers, setRandomBeers] = useState<RandomBeer[]>();
+  const [selectableFavoriteBeers, setSelectableFavoriteBeers] =
+    useState<SelectableFavoriteBeer[]>();
 
   const randomBeerList = useCallApi(getRandomBeerList);
   const searchBreweries = useCallApi(searchBeerList);
@@ -46,6 +52,34 @@ const Home = () => {
 
     return uniqueIdsSet;
   }, [favoriteBreweries.values]);
+
+  const onFavoriteBeerSelectionHandler = (
+    selectableFavoriteBeer: SelectableFavoriteBeer
+  ) => {
+    setSelectableFavoriteBeers((prevSelectableFavBeers) =>
+      prevSelectableFavBeers?.map((prevSelectableFavBeer) => ({
+        ...prevSelectableFavBeer,
+        checked:
+          selectableFavoriteBeer.id === prevSelectableFavBeer.id
+            ? !prevSelectableFavBeer.checked
+            : prevSelectableFavBeer.checked,
+      }))
+    );
+  };
+
+  const onRemoveSelectedFavoriteBeers = () => {
+    const favoriteBeersToDelete = selectableFavoriteBeers?.filter(
+      (selectableFavoriteBeer) => selectableFavoriteBeer.checked
+    );
+
+    if (favoriteBeersToDelete?.length) {
+      favoriteBreweries.deleteValues(
+        favoriteBeersToDelete.map(
+          (favoriteBeerToDelete) => favoriteBeerToDelete.id
+        )
+      );
+    }
+  };
 
   const fetchRandomBeerList = () => {
     randomBeerList.callApi(
@@ -109,6 +143,9 @@ const Home = () => {
     ]);
   };
 
+  /**
+   * Endlessly search beers as user scrolls down
+   */
   useEffect(() => {
     const controller = new AbortController();
 
@@ -129,6 +166,36 @@ const Home = () => {
 
     return () => controller.abort();
   }, [beerSearchSetting]);
+
+  /**
+   * Effect to create selectable favorite beers
+   */
+  useEffect(() => {
+    if (!favoriteBreweries.values?.length) {
+      setSelectableFavoriteBeers(undefined);
+      return;
+    }
+
+    const beerIdToCheckedStatus = selectableFavoriteBeers?.reduce(
+      (beerIdToCheckedStatus, selectableFavoriteBeer) => {
+        beerIdToCheckedStatus[selectableFavoriteBeer.id] =
+          selectableFavoriteBeer.checked;
+
+        return beerIdToCheckedStatus;
+      },
+      {} as { [beerId: string]: boolean }
+    );
+
+    setSelectableFavoriteBeers(
+      favoriteBreweries.values.map(({ id, name }) => ({
+        id,
+        name,
+        checked: beerIdToCheckedStatus
+          ? Boolean(beerIdToCheckedStatus[id])
+          : false,
+      }))
+    );
+  }, [favoriteBreweries.values]);
 
   /**
    * Effects to create random beers
@@ -210,7 +277,9 @@ const Home = () => {
             addSearchedBeerToFavorite={addSearchedBeerToFavorite}
           />
           <FavoriteBeersList
-            favoriteBeers={favoriteBreweries.values}
+            onFavoriteBeerSelectionHandler={onFavoriteBeerSelectionHandler}
+            favoriteBeers={selectableFavoriteBeers}
+            onRemoveSelectedFavoriteBeers={onRemoveSelectedFavoriteBeers}
             onRemoveAllFavoriteBeersHandler={() =>
               favoriteBreweries.deleteAllValues()
             }
