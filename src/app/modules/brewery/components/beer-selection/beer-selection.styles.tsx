@@ -15,6 +15,10 @@ ListContainer.defaultProps = {
   component: "div",
 };
 
+const SearchIconWrapper = styled(Box)({
+  color: "#999",
+});
+
 const ListHeader = styled(Box)(() => ({
   display: "flex",
   alignItems: "center",
@@ -33,4 +37,4 @@ ListHeader.defaultProps = {
   component: "ul",
 };
 
-export { ListContainer, ListHeader, List };
+export { ListContainer, ListHeader, List, SearchIconWrapper };

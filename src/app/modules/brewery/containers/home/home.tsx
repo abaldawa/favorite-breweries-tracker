@@ -1,20 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
-import { getRandomBeerList } from "../../../../shared/services/brewery/api";
+import {
+  getRandomBeerList,
+  searchBeerList,
+} from "../../../../shared/services/brewery/api";
 import { useCallApi } from "../../../../shared/hooks/use-call-api";
 import { useBreweryStore } from "../../../../store/brewery/store";
 import { FavoriteBeer } from "../../utils/local-storage/types";
 import { usePopupStore } from "../../../../store/popup/store";
 import { FavoriteBeersList } from "../../components/favorite-beers-list/favorite-beers-list";
-import { BeerSelection } from "../../components/beer-selection/beer-selection";
+import {
+  BeerSearchSetting,
+  BeerSelection,
+} from "../../components/beer-selection/beer-selection";
+import { Beer } from "../../../../shared/services/brewery/types";
 
 export interface RandomBeer extends FavoriteBeer {
   checked: boolean;
 }
 
+const MAX_BEER_SEARCH_RESULTS_PER_PAGE = 10;
+
 const Home = () => {
+  const [beerSearchSetting, setBeerSearchSetting] =
+    useState<BeerSearchSetting>();
   const [randomBeers, setRandomBeers] = useState<RandomBeer[]>();
 
   const randomBeerList = useCallApi(getRandomBeerList);
+  const searchBreweries = useCallApi(searchBeerList);
 
   const { favoriteBreweries } = useBreweryStore((state) => ({
     favoriteBreweries: state.favoriteBreweries,
@@ -76,6 +88,48 @@ const Home = () => {
     }
   };
 
+  const addSearchedBeerToFavorite = (beerToAddToFavorite: Beer) => {
+    if (uniqueIdsOfFavoriteBeers.has(beerToAddToFavorite.id)) {
+      showPopup({
+        type: "info",
+        title: "Note",
+        description: `Brewery '${beerToAddToFavorite.name}' is already added to favorite`,
+        dismissible: true,
+        variant: "warning",
+        buttons: {
+          confirm: {
+            label: "OK",
+          },
+        },
+      });
+      return;
+    }
+    favoriteBreweries.addValues([
+      { id: beerToAddToFavorite.id, name: beerToAddToFavorite.name },
+    ]);
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    if (beerSearchSetting) {
+      searchBreweries.callApi(
+        {
+          apiErrorMessage: "Error searching breweries",
+          errorPopupDismissible: true,
+        },
+        beerSearchSetting.beerTitleToSearch,
+        {
+          page: beerSearchSetting.page,
+          per_page: MAX_BEER_SEARCH_RESULTS_PER_PAGE,
+        },
+        controller.signal
+      );
+    }
+
+    return () => controller.abort();
+  }, [beerSearchSetting]);
+
   /**
    * Effects to create random beers
    */
@@ -118,6 +172,10 @@ const Home = () => {
   useEffect(() => {
     favoriteBreweries.fetchValues();
     fetchRandomBeerList();
+
+    return () => {
+      favoriteBreweries.reset();
+    };
   }, []);
 
   return (
@@ -125,12 +183,31 @@ const Home = () => {
       <section>
         <main>
           <BeerSelection
-            loading={randomBeerList.loading}
+            // random breweries props
+            randomBeerListLoading={randomBeerList.loading}
             randomBeers={randomBeers}
             favoriteBeerIds={uniqueIdsOfFavoriteBeers}
             fetchRandomBeerList={fetchRandomBeerList}
             addRandomBeersToFavorite={addRandomBeersToFavorite}
             onRandomBeerSelectionHandler={onRandomBeerSelectionHandler}
+            // breweries search props
+            beerSearchSetting={beerSearchSetting}
+            beerSearchResults={searchBreweries.data}
+            searchNextPageBeers={() => {
+              if (!searchBreweries.loading && beerSearchSetting) {
+                setBeerSearchSetting({
+                  ...beerSearchSetting,
+                  page: beerSearchSetting.page + 1,
+                });
+              }
+            }}
+            isNextBeerSearchAvailable={
+              !!searchBreweries.data &&
+              searchBreweries.data.length === MAX_BEER_SEARCH_RESULTS_PER_PAGE
+            }
+            beerSearchLoading={searchBreweries.loading}
+            onBeerSearchSettingHandler={setBeerSearchSetting}
+            addSearchedBeerToFavorite={addSearchedBeerToFavorite}
           />
           <FavoriteBeersList
             favoriteBeers={favoriteBreweries.values}

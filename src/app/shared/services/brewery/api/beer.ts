@@ -53,10 +53,24 @@ const getRandomBeerList = async (size = 3) => {
   return response.data;
 };
 
-// const searchBeerList = (query: string, isAutoComplete = false) =>
-//   axios.get(`${API}/breweries/${isAutoComplete ? "autocomplete" : "search"}`, {
-//     params: { query },
-//   });
+const searchBeerList = async (
+  query: string,
+  params: Required<Pick<ApiParams, "page" | "per_page">>,
+  abortSignal?: AbortSignal
+) => {
+  const { REACT_APP_BREWERY_API } = getEnvironmentVariables();
+
+  const response = await axios.get<Beer[]>(
+    `${REACT_APP_BREWERY_API}/breweries/search`,
+    {
+      params: { query, ...params },
+      signal: abortSignal,
+    }
+  );
+  await BeerArraySchema.parseAsync(response.data);
+
+  return response.data;
+};
 
 type BreweriesPaginationDetails = {
   [key in keyof BreweriesApiPagination]: number;
@@ -99,5 +113,5 @@ export {
   getBeerList,
   getRandomBeerList,
   getBeerListWithPaginationDetails,
-  // searchBeerList,
+  searchBeerList,
 };
