@@ -163,6 +163,7 @@ const BeerList = () => {
         <main>
           <DataGrid
             fixedHeaderWhenScroll
+            highlightEvenOddRows
             height={420}
             width={800}
             columns={gridColumns}
