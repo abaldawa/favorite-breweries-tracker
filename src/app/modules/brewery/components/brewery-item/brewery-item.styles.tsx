@@ -65,9 +65,13 @@ BreweryName.defaultProps = {
   variant: "h6",
 };
 
-const BreweryType = styled(Typography)({});
+const BreweryDescription = styled(Typography)({
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
 
-BreweryType.defaultProps = {
+BreweryDescription.defaultProps = {
   variant: "subtitle1",
 };
 
@@ -78,5 +82,5 @@ export {
   Poster,
   BreweryDetailsWrapper,
   BreweryName,
-  BreweryType,
+  BreweryDescription,
 };

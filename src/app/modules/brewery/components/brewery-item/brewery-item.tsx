@@ -8,7 +8,7 @@ import { Beer } from "../../../../shared/services/brewery/types";
 import { Avatar } from "@mui/material";
 import { SportsBar } from "@mui/icons-material";
 
-type SearchedBeer = Pick<Beer, "name" | "brewery_type">;
+type SearchedBeer = Pick<Beer, "name" | "brewery_type" | "country">;
 
 interface BreweryItemProps extends SearchedBeer {
   showHoverEffect?: boolean;
@@ -22,6 +22,7 @@ const BreweryItem: React.FC<BreweryItemProps> = (props) => {
   const {
     name,
     brewery_type,
+    country,
     isHovered,
     onClick,
     showHoverEffect,
@@ -45,7 +46,10 @@ const BreweryItem: React.FC<BreweryItemProps> = (props) => {
 
       <S.BreweryDetailsWrapper>
         <S.BreweryName>{name}</S.BreweryName>
-        <S.BreweryType>{brewery_type}</S.BreweryType>
+        <S.BreweryDescription>
+          {brewery_type}{" "}
+          <span style={{ textDecoration: "underline" }}>({country})</span>
+        </S.BreweryDescription>
       </S.BreweryDetailsWrapper>
 
       {renderBreweryActionItem?.()}

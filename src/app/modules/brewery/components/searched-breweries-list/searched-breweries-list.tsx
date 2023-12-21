@@ -46,6 +46,7 @@ const SearchedBreweriesList: React.FC<SearchedBreweriesListProps> = (props) => {
           key={searchedBeer.id}
           name={searchedBeer.name}
           brewery_type={searchedBeer.brewery_type}
+          country={searchedBeer.country}
           showHoverEffect
           sx={{ padding: "0.75rem" }}
           isHovered={(hovered) =>
