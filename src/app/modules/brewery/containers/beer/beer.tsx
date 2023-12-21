@@ -10,13 +10,14 @@ import {
   ScaleControl,
   ViewState,
 } from "react-map-gl";
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useCallApi } from "../../../../shared/hooks/use-call-api";
 import { getBeer } from "../../../../shared/services/brewery/api";
 import { BreweryAddress } from "../../components/brewery-address/brewery-address";
 import { MapMarkerPin } from "../../components/map-marker-pin/map-market-pin";
 import { getEnvironmentVariables } from "../../../../config/env";
 import { usePopupStore } from "../../../../store/popup/store";
+import { Loading } from "../../../../shared/components/app-components/loading/loading";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 const Beer = () => {
@@ -65,12 +66,18 @@ const Beer = () => {
     return null;
   }
 
+  if (beer.loading) {
+    return <Loading />;
+  }
+
   return (
     <article>
       <section>
-        <main>
+        <main
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+        >
           {!!beer.data?.latitude && !!beer.data.longitude ? (
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <>
               <Typography variant="h5">{beer.data.name}</Typography>
               <Map
                 mapboxAccessToken={envVariables.REACT_APP_MAPBOX_ACCESS_TOKEN}
@@ -120,13 +127,18 @@ const Beer = () => {
                   </Popup>
                 )}
               </Map>
-            </Box>
+            </>
           ) : (
             !!beer.data && (
-              <BreweryAddress
-                beer={beer.data}
-                sx={{ padding: "1rem", display: "inline-block" }}
-              />
+              <>
+                <Typography variant="subtitle1">
+                  Oops...no geo coordinates available but below is the address
+                </Typography>
+                <BreweryAddress
+                  beer={beer.data}
+                  sx={{ padding: "1rem", display: "inline-block" }}
+                />
+              </>
             )
           )}
         </main>
