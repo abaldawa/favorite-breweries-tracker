@@ -136,7 +136,7 @@ const Beer = () => {
                 </Typography>
                 <BreweryAddress
                   beer={beer.data}
-                  sx={{ padding: "1rem", display: "inline-block" }}
+                  sx={{ padding: "1rem", alignSelf: "flex-start" }}
                 />
               </>
             )
