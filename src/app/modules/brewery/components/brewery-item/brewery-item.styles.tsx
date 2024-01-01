@@ -6,19 +6,24 @@ import { Box, Typography, styled } from "@mui/material";
 import type { BreweryItemProps } from "./brewery-item";
 
 const Container = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "showHoverEffect",
-})<Pick<BreweryItemProps, "showHoverEffect">>(({ showHoverEffect }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: "1.25rem",
-  borderRadius: "0.5rem",
-  cursor: `pointer`,
-  ...(showHoverEffect && {
-    "&:hover": {
-      backgroundColor: "#F5FAFF",
-    },
-  }),
-}));
+  shouldForwardProp: (prop) =>
+    ["showHoverEffect", "disabled"].every((item) => item !== prop),
+})<Pick<BreweryItemProps, "showHoverEffect" | "disabled">>(
+  ({ showHoverEffect, disabled }) => ({
+    display: "flex",
+    alignItems: "center",
+    gap: "1.25rem",
+    borderRadius: "0.5rem",
+    cursor: disabled ? "not-allowed" : `pointer`,
+    backgroundColor: disabled ? "lightgray" : undefined,
+    ...(showHoverEffect &&
+      !disabled && {
+        "&:hover": {
+          backgroundColor: "#F5FAFF",
+        },
+      }),
+  })
+);
 
 Container.defaultProps = {
   component: "article",

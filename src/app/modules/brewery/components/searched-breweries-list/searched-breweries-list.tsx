@@ -13,6 +13,7 @@ interface SearchedBreweriesListProps {
   loading?: boolean;
   searchedBeers?: Beer[];
   hasNextPage?: boolean;
+  favoriteBeerIds: Set<string>;
   onBreweryClicked: (beer: Beer) => void;
   fetchNextPageSearchResults: () => void;
 }
@@ -22,6 +23,7 @@ const SearchedBreweriesList: React.FC<SearchedBreweriesListProps> = (props) => {
     loading,
     searchedBeers,
     hasNextPage,
+    favoriteBeerIds,
     onBreweryClicked,
     fetchNextPageSearchResults,
   } = props;
@@ -45,6 +47,7 @@ const SearchedBreweriesList: React.FC<SearchedBreweriesListProps> = (props) => {
         <BreweryItem
           key={searchedBeer.id}
           name={searchedBeer.name}
+          disabled={favoriteBeerIds.has(searchedBeer.id)}
           brewery_type={searchedBeer.brewery_type}
           country={searchedBeer.country}
           showHoverEffect

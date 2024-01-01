@@ -89,6 +89,7 @@ const BeerSelection: React.FC<BeerSelectionProps> = (props) => {
               Boolean(beerSearchSetting?.beerTitleToSearch.length) && (
                 <SearchedBreweriesList
                   loading={beerSearchLoading}
+                  favoriteBeerIds={favoriteBeerIds}
                   searchedBeers={beerSearchResults}
                   hasNextPage={isNextBeerSearchAvailable}
                   onBreweryClicked={addSearchedBeerToFavorite}

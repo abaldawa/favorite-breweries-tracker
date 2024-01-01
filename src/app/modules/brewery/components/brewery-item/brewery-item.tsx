@@ -12,6 +12,7 @@ type SearchedBeer = Pick<Beer, "name" | "brewery_type" | "country">;
 
 interface BreweryItemProps extends SearchedBeer {
   showHoverEffect?: boolean;
+  disabled?: boolean;
   isHovered?: (isHovered: boolean) => void;
   onClick?: () => void | Promise<void>;
   renderBreweryActionItem?: () => React.ReactNode;
@@ -23,6 +24,7 @@ const BreweryItem: React.FC<BreweryItemProps> = (props) => {
     name,
     brewery_type,
     country,
+    disabled,
     isHovered,
     onClick,
     showHoverEffect,
@@ -32,10 +34,11 @@ const BreweryItem: React.FC<BreweryItemProps> = (props) => {
 
   return (
     <S.Container
+      disabled={disabled}
       showHoverEffect={showHoverEffect}
       onMouseEnter={isHovered && (() => isHovered(true))}
       onMouseLeave={isHovered && (() => isHovered(false))}
-      onClick={onClick && (() => onClick())}
+      onClick={!disabled ? onClick && (() => onClick()) : undefined}
       sx={sx}
     >
       <S.PosterWrapper>
@@ -52,7 +55,7 @@ const BreweryItem: React.FC<BreweryItemProps> = (props) => {
         </S.BreweryDescription>
       </S.BreweryDetailsWrapper>
 
-      {renderBreweryActionItem?.()}
+      {!disabled && renderBreweryActionItem?.()}
     </S.Container>
   );
 };
